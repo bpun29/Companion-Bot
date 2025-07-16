@@ -1,0 +1,47 @@
+name: botmobileapp
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.0.15
+  image_picker: ^1.0.2
+  # emoji_picker_flutter: ^1.6.3
+  giphy_get: ^3.0.0
+  giphy_picker: ^3.0.2 
+  speech_to_text: ^7.2.0
+  permission_handler: ^11.0.1
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.8
+  hive_generator: ^2.0.1
+
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/botlogo.png
+    - assets/icons/
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: fonts/Poppins-SemiBold.ttf
+          weight: 600

@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/message.dart';
 import '../models/bot.dart';
 
 class BotProfileScreen extends StatefulWidget {
@@ -33,17 +34,16 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Create Bot'),
+        title: const Text(
+          'Create Bot',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: Colors.white,
-        elevation: 0.5,
+        elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -54,18 +54,23 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
               onTap: _pickImage,
               child: CircleAvatar(
                 radius: 50,
+                backgroundColor: Colors.purpleAccent.withOpacity(0.2),
                 backgroundImage:
                     _profilePicPath != null
                         ? FileImage(File(_profilePicPath!))
                         : null,
                 child:
                     _profilePicPath == null
-                        ? const Icon(Icons.add_a_photo, size: 30)
+                        ? const Icon(
+                          Icons.add_a_photo,
+                          size: 30,
+                          color: Colors.black54,
+                        )
                         : null,
               ),
             ),
             const SizedBox(height: 24),
-            _buildInputField(nameController, 'Name'),
+            _buildInputField(nameController, 'Name*'),
             _buildInputField(taglineController, 'Tagline'),
             _buildInputField(greetingController, 'Greeting'),
             _buildDropdownField(),
@@ -80,6 +85,18 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () async {
+                if (_selectedCategory == null ||
+                    nameController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please insert name and select category'),
+                      backgroundColor: Colors.red,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                  return;
+                }
+
                 final bot = Bot(
                   name: nameController.text.trim(),
                   tagline: taglineController.text.trim(),
@@ -90,19 +107,22 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
 
                 final botBox = Hive.box<Bot>('bots');
                 await botBox.add(bot);
-
+                await Hive.openBox<Message>('chat_${bot.key}');
                 Navigator.pop(context, bot);
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                 padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: const Color(0xff92A3FD),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(50),
                 ),
               ),
               child: const Text(
-                'Save',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                'create',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -124,9 +144,9 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
         decoration: InputDecoration(
           labelText: label,
           filled: true,
-          fillColor: const Color.fromARGB(255, 255, 255, 255),
+          fillColor: const Color(0xffF7F8F8),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
           ),
         ),
@@ -140,27 +160,71 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
       child: DropdownButtonFormField<String>(
         value: _selectedCategory,
         decoration: InputDecoration(
-          labelText: 'Category',
+          labelText: 'Category*',
           filled: true,
-          fillColor: const Color.fromARGB(255, 255, 255, 255),
+          fillColor: const Color(0xffF7F8F8),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(15),
             borderSide: BorderSide.none,
           ),
         ),
-        items:
-            _categories.map((category) {
-              return DropdownMenuItem<String>(
-                value: category,
-                child: Text(category),
-              );
-            }).toList(),
+        items: [
+          ..._categories.map(
+            (category) =>
+                DropdownMenuItem(value: category, child: Text(category)),
+          ),
+          const DropdownMenuItem(
+            value: 'add_new',
+            child: Text('➕ Add new category'),
+          ),
+        ],
         onChanged: (value) {
-          setState(() {
-            _selectedCategory = value;
-          });
+          if (value == 'add_new') {
+            _showAddCategoryDialog();
+          } else {
+            setState(() {
+              _selectedCategory = value;
+            });
+          }
         },
       ),
+    );
+  }
+
+  void _showAddCategoryDialog() {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Add New Category'),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: 'Enter category name',
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  final newCategory = controller.text.trim();
+                  if (newCategory.isNotEmpty &&
+                      !_categories.contains(newCategory)) {
+                    setState(() {
+                      _categories.add(newCategory);
+                      _selectedCategory = newCategory;
+                    });
+                  }
+                  Navigator.pop(context);
+                },
+                child: const Text('Add'),
+              ),
+            ],
+          ),
     );
   }
 }

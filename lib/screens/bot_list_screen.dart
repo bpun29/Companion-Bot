@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../models/message.dart';
 import '../models/bot.dart';
 
 class BotListScreen extends StatefulWidget {
@@ -14,6 +15,7 @@ class BotListScreen extends StatefulWidget {
 
 class _BotListScreenState extends State<BotListScreen> {
   late Box<Bot> botBox;
+  String? _selectedCategory;
 
   @override
   void initState() {
@@ -71,8 +73,13 @@ class _BotListScreenState extends State<BotListScreen> {
       ),
       actions: [
         GestureDetector(
-          onTap: () {
-            Navigator.pushNamed(context, '/botProfile');
+          onTap: () async {
+            final result = await Navigator.pushNamed(context, '/botProfile');
+            if (result != null) {
+              setState(() {
+                // This will refresh the UI and show the new bot.
+              });
+            }
           },
           child: Padding(
             padding: const EdgeInsets.all(10),
@@ -128,44 +135,52 @@ class _BotListScreenState extends State<BotListScreen> {
   }
 
   Widget _categorySection(List<Bot> bots) {
+    final categories = ['All', ...bots.map((b) => b.category).toSet().toList()];
+
     return Padding(
       padding: const EdgeInsets.only(left: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Category',
+            'Categories',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 15),
           SizedBox(
-            height: 110,
+            height: 45,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
-              itemCount: bots.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 20),
+              itemCount: categories.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
-                final bot = bots[index];
-                return Container(
-                  width: 90,
-                  decoration: BoxDecoration(
-                    color: Colors.blueAccent.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: SvgPicture.asset(
-                          'assets/icons/${bot.name}.svg',
-                          height: 30,
-                          width: 30,
-                          fit: BoxFit.contain,
-                        ),
+                final category = categories[index];
+                final isSelected =
+                    _selectedCategory == category ||
+                    (_selectedCategory == null && category == 'All');
+
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = category == 'All' ? null : category;
+                    });
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.blue : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    child: Text(
+                      category,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.w500,
                       ),
-                      Text(bot.name, style: const TextStyle(fontSize: 14)),
-                    ],
+                    ),
                   ),
                 );
               },
@@ -177,6 +192,11 @@ class _BotListScreenState extends State<BotListScreen> {
   }
 
   Widget _recommendationSection(List<Bot> bots) {
+    final filteredBots =
+        _selectedCategory == null
+            ? bots
+            : bots.where((b) => b.category == _selectedCategory).toList();
+
     return Padding(
       padding: const EdgeInsets.only(left: 20),
       child: Column(
@@ -192,10 +212,10 @@ class _BotListScreenState extends State<BotListScreen> {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.only(right: 20),
-              itemCount: bots.length,
+              itemCount: filteredBots.length,
               separatorBuilder: (_, __) => const SizedBox(width: 20),
               itemBuilder: (context, index) {
-                final bot = bots[index];
+                final bot = filteredBots[index];
                 return GestureDetector(
                   onTap: () => _openChat(bot),
                   child: Container(
@@ -274,7 +294,7 @@ class _BotListScreenState extends State<BotListScreen> {
           (context) => AlertDialog(
             title: const Text('Clear All Bots?'),
             content: const Text(
-              'This will permanently remove all bots and their chats.',
+              'This will permanently delete all bots and chats.',
             ),
             actions: [
               TextButton(
@@ -293,32 +313,42 @@ class _BotListScreenState extends State<BotListScreen> {
     );
 
     if (confirmed == true) {
-      final keys = botBox.keys.toList();
+      final botKeys = botBox.keys.toList();
 
-      // Delete all related chat boxes
-      for (var key in keys) {
-        final chatBoxName = 'chat_$key';
-        if (Hive.isBoxOpen(chatBoxName)) {
-          await Hive.box(chatBoxName).clear();
-          await Hive.box(chatBoxName).close();
-          await Hive.deleteBoxFromDisk(chatBoxName);
-        } else if (await Hive.boxExists(chatBoxName)) {
-          await Hive.deleteBoxFromDisk(chatBoxName);
+      for (var botKey in botKeys) {
+        final chatBoxName = 'chat_$botKey';
+
+        try {
+          if (await Hive.boxExists(chatBoxName)) {
+            Box<Message> chatBox;
+
+            if (Hive.isBoxOpen(chatBoxName)) {
+              chatBox = Hive.box<Message>(chatBoxName);
+            } else {
+              chatBox = await Hive.openBox<Message>(chatBoxName);
+            }
+
+            await chatBox.clear();
+            await chatBox.close();
+            await Hive.deleteBoxFromDisk(chatBoxName);
+          }
+        } catch (e) {
+          debugPrint('Error deleting chat box $chatBoxName: $e');
         }
       }
 
-      // Delete all bots
-      await botBox.deleteAll(keys);
+      await botBox.clear();
 
-      setState(() {});
-
-      // Show confirmation message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('All bots and their chats have been deleted.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('All bots and their chats have been deleted.'),
+            backgroundColor: Colors.redAccent,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 }

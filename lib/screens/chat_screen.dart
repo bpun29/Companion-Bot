@@ -196,7 +196,6 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   Future<void> _pickGif() async {
     final gif = await GiphyPicker.pickGif(
       context: context,
-      apiKey: 'pUa6vBzHMnslZ0KbqCJYXo9XBVq2GimB',
     );
     if (gif != null) {
       sendMessage('', imageUrl: gif.images.original!.url);

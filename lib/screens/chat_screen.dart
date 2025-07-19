@@ -1,12 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:giphy_picker/giphy_picker.dart';
+import 'package:tenor_flutter/tenor_flutter.dart';
 import 'package:hive/hive.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
 import '../models/bot.dart';
 import '../models/message.dart';
 
@@ -194,11 +193,16 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
   }
 
   Future<void> _pickGif() async {
-    final gif = await GiphyPicker.pickGif(
+    final tenorClient = Tenor(
+      apiKey: 'AIzaSyCNY_kjigZ-RepT0EWXFbQYvotDQmpZEPQ',
+      clientKey: 'My Project',
+    );
+    final TenorResult? result = await tenorClient.showAsBottomSheet(
       context: context,
     );
-    if (gif != null) {
-      sendMessage('', imageUrl: gif.images.original!.url);
+    if (result != null && result.media.tinyGif?.url != null) {
+      final gifUrl = result.media.tinyGif!.url!;
+      sendMessage('', imageUrl: gifUrl);
     }
   }
 

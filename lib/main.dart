@@ -3,11 +3,10 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'models/bot.dart';
 import 'models/message.dart';
-import 'screens/login_screen.dart';
+import 'screens/home.dart';
 import 'screens/bot_list_screen.dart';
 import 'screens/bot_profile_screen.dart';
 import 'screens/chat_screen.dart';
-// import 'screens/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,8 +39,7 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(primarySwatch: Colors.blue, fontFamily: 'Poppins'),
       initialRoute: '/',
       routes: {
-        // '/': (context) => const HomePage(),
-        '/': (context) => const LoginScreen(),
+        '/': (context) => const HomeScreen(),
         '/botList': (context) => const BotListScreen(),
         '/botProfile': (context) => const BotProfileScreen(),
         '/chat': (context) => const ChatScreen(),

@@ -14,12 +14,11 @@ dependencies:
   path_provider: ^2.0.15
   image_picker: ^1.0.2
   # emoji_picker_flutter: ^1.6.3
-  giphy_get: ^3.0.0
-  giphy_picker: ^3.0.2 
   speech_to_text: ^7.2.0
   permission_handler: ^11.0.1
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.2.0
+  tenor_flutter: ^0.0.5
 
 dev_dependencies:
   flutter_test:

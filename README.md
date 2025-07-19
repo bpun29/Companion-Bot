@@ -8,7 +8,7 @@ A Flutter-based chatbot app.
   - Text input
   - Voice input (speech-to-text)
   - Image support
-  - GIF support via Giphy
+  - GIF/Sticker support via Tenor
 - Local storage using Hive
 
 ### Prerequisites
@@ -18,7 +18,6 @@ A Flutter-based chatbot app.
 
 ### Setup
 Run the following commands in your terminal:
-- flutter clean
 - flutter pub get
   
 Then launch the app from: lib/main.dart

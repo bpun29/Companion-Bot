@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -23,10 +24,19 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
-            const CircleAvatar(
-              radius: 80,
-              backgroundImage: AssetImage('assets/images/botlogo.png'),
+            // const CircleAvatar(
+            //   radius: 80,
+            //   backgroundImage: AssetImage('assets/icons/Logo_LoveBot.svg'),
+            // ),
+            ClipOval(
+              child: SvgPicture.asset(
+                'assets/icons/Logo_LoveBot.svg',
+                width: 160,
+                height: 160,
+                fit: BoxFit.cover,
+              ),
             ),
+
             const SizedBox(height: 32),
             const Text(
               'Welcome to Companion AI',
@@ -60,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                   ),
                   child: const Center(
                     child: Text(
-                      'let\'s chat!',
+                      'Let\'s chat!',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

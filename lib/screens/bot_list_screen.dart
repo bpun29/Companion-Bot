@@ -40,7 +40,7 @@ class _BotListScreenState extends State<BotListScreen> {
             const SizedBox(height: 30),
             _categorySection(bots),
             const SizedBox(height: 30),
-            _recommendationSection(bots),
+            _myBotsSection(bots),
             const SizedBox(height: 30),
           ],
         ),
@@ -91,10 +91,6 @@ class _BotListScreenState extends State<BotListScreen> {
               child: const Icon(Icons.add, color: Colors.black),
             ),
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.delete_forever, color: Colors.black),
-          onPressed: _confirmAndClearBots,
         ),
       ],
     );
@@ -154,7 +150,8 @@ class _BotListScreenState extends State<BotListScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final category = categories[index];
-                final isSelected = _selectedCategory == category ||
+                final isSelected =
+                    _selectedCategory == category ||
                     (_selectedCategory == null && category == 'All');
 
                 return GestureDetector(
@@ -189,10 +186,11 @@ class _BotListScreenState extends State<BotListScreen> {
     );
   }
 
-  Widget _recommendationSection(List<Bot> bots) {
-    final filteredBots = _selectedCategory == null
-        ? bots
-        : bots.where((b) => b.category == _selectedCategory).toList();
+  Widget _myBotsSection(List<Bot> bots) {
+    final filteredBots =
+        _selectedCategory == null
+            ? bots
+            : bots.where((b) => b.category == _selectedCategory).toList();
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -211,70 +209,91 @@ class _BotListScreenState extends State<BotListScreen> {
             separatorBuilder: (_, __) => const SizedBox(height: 20),
             itemBuilder: (context, index) {
               final bot = filteredBots[index];
-              return GestureDetector(
-                onTap: () => _openChat(bot),
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 240, 155, 255).withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.white,
-                        child: SvgPicture.asset(
-                          'assets/icons/P-${bot.name}.svg',
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.contain,
-                        ),
+              return Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () => _openChat(bot),
+                    child: Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(
+                          255,
+                          240,
+                          155,
+                          255,
+                        ).withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      const SizedBox(height: 10),
-                      Column(
+                      padding: const EdgeInsets.all(15),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Text(
-                            bot.name,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.white,
+                            child: SvgPicture.asset(
+                              'assets/icons/P-${bot.name}.svg',
+                              height: 50,
+                              width: 50,
+                              fit: BoxFit.contain,
                             ),
                           ),
-                          Text(
-                            bot.tagline,
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 13,
+                          const SizedBox(height: 10),
+                          Column(
+                            children: [
+                              Text(
+                                bot.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                bot.tagline,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            height: 40,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xff9DCEFF), Color(0xff92A3FD)],
+                              ),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Chat',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 40,
-                        width: 120,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xff9DCEFF), Color(0xff92A3FD)],
-                          ),
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'Chat',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
+                  // Positioned Delete Button
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.delete_forever,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => _confirmAndClearBots(bot),
+                    ),
+                  ),
+                ],
               );
             },
           ),
@@ -283,64 +302,68 @@ class _BotListScreenState extends State<BotListScreen> {
     );
   }
 
-  Future<void> _confirmAndClearBots() async {
+  Future<void> _confirmAndClearBots(Bot bot) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xffF7F8F8),
-        title: const Text('Clear All Bots?'),
-        content: const Text(
-          'This will permanently delete all bots and chats.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel',
-            style: TextStyle(color: Colors.blueAccent)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text(
-              'Confirm',
-              style: TextStyle(color: Colors.red),
+      builder:
+          (context) => AlertDialog(
+            backgroundColor: const Color(0xffF7F8F8),
+            title: Text('Delete ${bot.name}?'),
+            content: const Text(
+              'This will permanently delete this bot and chat.',
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.blueAccent),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Confirm',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
 
     if (confirmed == true) {
-      final botKeys = botBox.keys.toList();
+      final chatBoxName = 'chat_${bot.key}';
+      try {
+        if (await Hive.boxExists(chatBoxName)) {
+          Box<Message> chatBox;
 
-      for (var botKey in botKeys) {
-        final chatBoxName = 'chat_$botKey';
-
-        try {
-          if (await Hive.boxExists(chatBoxName)) {
-            Box<Message> chatBox;
-
-            if (Hive.isBoxOpen(chatBoxName)) {
-              chatBox = Hive.box<Message>(chatBoxName);
-            } else {
-              chatBox = await Hive.openBox<Message>(chatBoxName);
-            }
-
-            await chatBox.clear();
-            await chatBox.close();
-            await Hive.deleteBoxFromDisk(chatBoxName);
+          if (Hive.isBoxOpen(chatBoxName)) {
+            chatBox = Hive.box<Message>(chatBoxName);
+          } else {
+            chatBox = await Hive.openBox<Message>(chatBoxName);
           }
-        } catch (e) {
-          debugPrint('Error deleting chat box $chatBoxName: $e');
+          await chatBox.clear();
+          await chatBox.close();
+          await Hive.deleteBoxFromDisk(chatBoxName);
         }
+      } catch (e) {
+        debugPrint('Error deleting chat box $chatBoxName: $e');
       }
-
-      await botBox.clear();
-
+      final keyToDelete = botBox.keys.firstWhere(
+        (key) => botBox.get(key)?.name == bot.name,
+        orElse: () => null,
+      );
+      if (keyToDelete != null) {
+        await botBox.delete(keyToDelete);
+        debugPrint('Deleted bot with key: $keyToDelete');
+      } else {
+        debugPrint('Bot not found in box');
+      }
       if (mounted) {
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('All bots and their chats have been deleted.'),
+            content: Text('Deleted.'),
             backgroundColor: Colors.redAccent,
             duration: Duration(seconds: 2),
           ),

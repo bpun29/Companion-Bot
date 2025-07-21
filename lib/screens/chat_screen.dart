@@ -174,8 +174,10 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel',
-                style: TextStyle(color: Colors.blueAccent),),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.blueAccent),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -342,7 +344,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     );
     final selectedGif =
         result?.media.tinyGif ?? result?.media.tinyGifTransparent;
-    sendMessage('', imageUrl: selectedGif?.url);
+    if (selectedGif?.url != null) {
+      sendMessage('', imageUrl: selectedGif!.url);
+    }
   }
 
   void _startListening() {

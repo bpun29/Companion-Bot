@@ -86,70 +86,79 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: messages.length,
-              itemBuilder: (context, index) => buildMessage(messages[index]),
+      body: Container(
+        color: const Color(0xffF7F8F8),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: messages.length,
+                itemBuilder: (context, index) => buildMessage(messages[index]),
+              ),
             ),
-          ),
-          Row(
-            children: [
-              IconButton(icon: const Icon(Icons.image), onPressed: _pickImage),
-              IconButton(icon: const Icon(Icons.gif), onPressed: _pickGif),
-              AnimatedBuilder(
-                animation: _micScaleAnimation,
-                builder: (context, child) {
-                  return GestureDetector(
-                    onTapDown: (_) {
-                      if (_speechAvailable && !_isListening) {
-                        _startListening();
-                      }
-                    },
-                    onTapUp: (_) {
-                      if (_isListening) _stopListening();
-                    },
-                    onTapCancel: () {
-                      if (_isListening) _stopListening();
-                    },
-                    child: Transform.scale(
-                      scale: _isListening ? _micScaleAnimation.value : 1.0,
-                      child: Icon(
-                        Icons.mic,
-                        color:
-                            _speechAvailable
-                                ? (_isListening ? Colors.red : Colors.black)
-                                : Colors.grey,
-                        size: 28,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              Expanded(
-                child: TextField(
-                  controller: messageController,
-                  decoration: const InputDecoration(
-                    hintText: 'Message...',
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            Container(
+              color: Colors.white,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.image),
+                    onPressed: _pickImage,
                   ),
-                  onSubmitted: (text) {
-                    if (text.trim().isNotEmpty) sendMessage(text.trim());
-                  },
-                ),
+                  IconButton(icon: const Icon(Icons.gif), onPressed: _pickGif),
+                  AnimatedBuilder(
+                    animation: _micScaleAnimation,
+                    builder: (context, child) {
+                      return GestureDetector(
+                        onTapDown: (_) {
+                          if (_speechAvailable && !_isListening) {
+                            _startListening();
+                          }
+                        },
+                        onTapUp: (_) {
+                          if (_isListening) _stopListening();
+                        },
+                        onTapCancel: () {
+                          if (_isListening) _stopListening();
+                        },
+                        child: Transform.scale(
+                          scale: _isListening ? _micScaleAnimation.value : 1.0,
+                          child: Icon(
+                            Icons.mic,
+                            color:
+                                _speechAvailable
+                                    ? (_isListening ? Colors.red : Colors.black)
+                                    : Colors.grey,
+                            size: 28,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: TextField(
+                      controller: messageController,
+                      decoration: const InputDecoration(
+                        hintText: 'Message...',
+                        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      onSubmitted: (text) {
+                        if (text.trim().isNotEmpty) sendMessage(text.trim());
+                      },
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: () {
+                      final text = messageController.text.trim();
+                      if (text.isNotEmpty) sendMessage(text);
+                    },
+                  ),
+                ],
               ),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: () {
-                  final text = messageController.text.trim();
-                  if (text.isNotEmpty) sendMessage(text);
-                },
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -159,12 +168,14 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
       context: context,
       builder:
           (context) => AlertDialog(
+            backgroundColor: const Color(0xffF7F8F8),
             title: const Text('Clear Chat?'),
             content: const Text('This will delete all messages in this chat.'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child: const Text('Cancel',
+                style: TextStyle(color: Colors.blueAccent),),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -265,9 +276,9 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     });
   }
 
+  // Bot profile in chat
   Widget buildMessage(Message msg) {
     final isUser = msg.isUser;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       child: Row(
@@ -280,7 +291,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               radius: 20,
               backgroundColor: Colors.white,
               child: SvgPicture.asset(
-                'assets/icons/${bot.name}.svg',
+                'assets/icons/P-${bot.name}.svg',
                 height: 50,
                 width: 50,
                 fit: BoxFit.contain,

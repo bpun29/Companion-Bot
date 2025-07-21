@@ -18,7 +18,14 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
   final greetingController = TextEditingController();
 
   String? _profilePicPath;
-  final List<String> _categories = ['Entertainment', 'Travel', 'Other'];
+  final List<String> _categories = [
+    'Entertainment',
+    'Food',
+    'Sport',
+    'Study',
+    'Travel',
+    'Other'
+  ];
   String? _selectedCategory;
 
   Future<void> _pickImage() async {
@@ -55,18 +62,16 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
               child: CircleAvatar(
                 radius: 50,
                 backgroundColor: Colors.purpleAccent.withOpacity(0.2),
-                backgroundImage:
-                    _profilePicPath != null
-                        ? FileImage(File(_profilePicPath!))
-                        : null,
-                child:
-                    _profilePicPath == null
-                        ? const Icon(
-                          Icons.add_a_photo,
-                          size: 30,
-                          color: Colors.black54,
-                        )
-                        : null,
+                backgroundImage: _profilePicPath != null
+                    ? FileImage(File(_profilePicPath!))
+                    : null,
+                child: _profilePicPath == null
+                    ? const Icon(
+                        Icons.add_a_photo,
+                        size: 30,
+                        color: Colors.black54,
+                      )
+                    : null,
               ),
             ),
             const SizedBox(height: 24),
@@ -83,45 +88,55 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           child: SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () async {
-                if (_selectedCategory == null ||
-                    nameController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please insert name and select category'),
-                      backgroundColor: Colors.red,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                  return;
-                }
-
-                final bot = Bot(
-                  name: nameController.text.trim(),
-                  tagline: taglineController.text.trim(),
-                  greeting: greetingController.text.trim(),
-                  category: _selectedCategory!,
-                  profilePicPath: _profilePicPath,
-                );
-
-                final botBox = Hive.box<Bot>('bots');
-                await botBox.add(bot);
-                await Hive.openBox<Message>('chat_${bot.key}');
-                Navigator.pop(context, bot);
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: const Color(0xff92A3FD),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Color(0xff9DCEFF), Color(0xff92A3FD)],
                 ),
+                borderRadius: BorderRadius.circular(50),
               ),
-              child: const Text(
-                'create',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
+              child: ElevatedButton(
+                onPressed: () async {
+                  if (_selectedCategory == null ||
+                      nameController.text.trim().isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please insert name and select category'),
+                        backgroundColor: Colors.red,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                    return;
+                  }
+
+                  final bot = Bot(
+                    name: nameController.text.trim(),
+                    tagline: taglineController.text.trim(),
+                    greeting: greetingController.text.trim(),
+                    category: _selectedCategory!,
+                    profilePicPath: _profilePicPath,
+                  );
+
+                  final botBox = Hive.box<Bot>('bots');
+                  await botBox.add(bot);
+                  await Hive.openBox<Message>('chat_${bot.key}');
+                  Navigator.pop(context, bot);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ),
+                child: const Text(
+                  'Create',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16
+                  ),
                 ),
               ),
             ),
@@ -195,36 +210,35 @@ class _BotProfileScreenState extends State<BotProfileScreen> {
     final controller = TextEditingController();
     showDialog(
       context: context,
-      builder:
-          (_) => AlertDialog(
-            title: const Text('Add New Category'),
-            content: TextField(
-              controller: controller,
-              decoration: const InputDecoration(
-                hintText: 'Enter category name',
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () {
-                  final newCategory = controller.text.trim();
-                  if (newCategory.isNotEmpty &&
-                      !_categories.contains(newCategory)) {
-                    setState(() {
-                      _categories.add(newCategory);
-                      _selectedCategory = newCategory;
-                    });
-                  }
-                  Navigator.pop(context);
-                },
-                child: const Text('Add'),
-              ),
-            ],
+      builder: (_) => AlertDialog(
+        title: const Text('Add New Category'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter category name',
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              final newCategory = controller.text.trim();
+              if (newCategory.isNotEmpty &&
+                  !_categories.contains(newCategory)) {
+                setState(() {
+                  _categories.add(newCategory);
+                  _selectedCategory = newCategory;
+                });
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
     );
   }
 }

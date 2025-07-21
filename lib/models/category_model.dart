@@ -18,7 +18,7 @@ class CategoryModel {
     categories.add(
       CategoryModel(
         name: 'Max',
-        iconPath: 'assets/icons/Max.svg',
+        iconPath: 'assets/icons/P-Max.svg',
         boxColor: const Color.fromARGB(255, 188, 255, 221),
       ),
     );
@@ -26,7 +26,7 @@ class CategoryModel {
     categories.add(
       CategoryModel(
         name: 'Tom',
-        iconPath: 'assets/icons/Tom.svg',
+        iconPath: 'assets/icons/P-Tom.svg',
         boxColor: const Color.fromARGB(255, 158, 255, 249),
       ),
     );

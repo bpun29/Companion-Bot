@@ -1,5 +1,3 @@
-// import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -34,15 +32,18 @@ class _BotListScreenState extends State<BotListScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _customAppBar(),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _searchField(),
-          const SizedBox(height: 30),
-          _categorySection(bots),
-          const SizedBox(height: 30),
-          _recommendationSection(bots),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _searchField(),
+            const SizedBox(height: 30),
+            _categorySection(bots),
+            const SizedBox(height: 30),
+            _recommendationSection(bots),
+            const SizedBox(height: 30),
+          ],
+        ),
       ),
     );
   }
@@ -76,9 +77,7 @@ class _BotListScreenState extends State<BotListScreen> {
           onTap: () async {
             final result = await Navigator.pushNamed(context, '/botProfile');
             if (result != null) {
-              setState(() {
-                // This will refresh the UI and show the new bot.
-              });
+              setState(() {});
             }
           },
           child: Padding(
@@ -155,8 +154,7 @@ class _BotListScreenState extends State<BotListScreen> {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final category = categories[index];
-                final isSelected =
-                    _selectedCategory == category ||
+                final isSelected = _selectedCategory == category ||
                     (_selectedCategory == null && category == 'All');
 
                 return GestureDetector(
@@ -192,95 +190,93 @@ class _BotListScreenState extends State<BotListScreen> {
   }
 
   Widget _recommendationSection(List<Bot> bots) {
-    final filteredBots =
-        _selectedCategory == null
-            ? bots
-            : bots.where((b) => b.category == _selectedCategory).toList();
+    final filteredBots = _selectedCategory == null
+        ? bots
+        : bots.where((b) => b.category == _selectedCategory).toList();
 
     return Padding(
-      padding: const EdgeInsets.only(left: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Recommendation\nfor you',
+            'Your bots',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 15),
-          SizedBox(
-            height: 240,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.only(right: 20),
-              itemCount: filteredBots.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 20),
-              itemBuilder: (context, index) {
-                final bot = filteredBots[index];
-                return GestureDetector(
-                  onTap: () => _openChat(bot),
-                  child: Container(
-                    width: 210,
-                    decoration: BoxDecoration(
-                      color: Colors.purpleAccent.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    padding: const EdgeInsets.all(15),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        CircleAvatar(
-                          radius: 50,
-                          backgroundColor: Colors.white,
-                          child: SvgPicture.asset(
-                            'assets/icons/${bot.name}.svg',
-                            height: 50,
-                            width: 50,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              bot.name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              bot.tagline,
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          height: 40,
-                          width: 120,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xff9DCEFF), Color(0xff92A3FD)],
-                            ),
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Chat',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+          ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: filteredBots.length,
+            separatorBuilder: (_, __) => const SizedBox(height: 20),
+            itemBuilder: (context, index) {
+              final bot = filteredBots[index];
+              return GestureDetector(
+                onTap: () => _openChat(bot),
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 240, 155, 255).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                );
-              },
-            ),
+                  padding: const EdgeInsets.all(15),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.white,
+                        child: SvgPicture.asset(
+                          'assets/icons/P-${bot.name}.svg',
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Column(
+                        children: [
+                          Text(
+                            bot.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                          Text(
+                            bot.tagline,
+                            style: const TextStyle(
+                              color: Colors.grey,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        height: 40,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff9DCEFF), Color(0xff92A3FD)],
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Chat',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -290,26 +286,27 @@ class _BotListScreenState extends State<BotListScreen> {
   Future<void> _confirmAndClearBots() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Clear All Bots?'),
-            content: const Text(
-              'This will permanently delete all bots and chats.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text(
-                  'Confirm',
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xffF7F8F8),
+        title: const Text('Clear All Bots?'),
+        content: const Text(
+          'This will permanently delete all bots and chats.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel',
+            style: TextStyle(color: Colors.blueAccent)),
           ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text(
+              'Confirm',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
     );
 
     if (confirmed == true) {
